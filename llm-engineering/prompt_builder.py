@@ -138,6 +138,7 @@ PROMPT_PATTERNS = {
     },
 }
 
+
 class PromptBuilder:
     def __init__(self):
         pass
@@ -151,7 +152,9 @@ class PromptBuilder:
         return pattern
 
     def _build_system(self, pattern_name, pattern, system_override):
-        return system_override or f"You are an AI assistant using the {pattern['name']}."
+        return (
+            system_override or f"You are an AI assistant using the {pattern['name']}."
+        )
 
     def build_prompt(self, pattern_name, variables, system_override=None):
         pattern = self._get_pattern(pattern_name)
@@ -189,14 +192,17 @@ class PromptBuilder:
             "temperature": pattern["temperature"],
             "pattern": pattern_name,
         }
-    
-    
-prompt_builder=PromptBuilder()
-prompt = prompt_builder.build_prompt("persona", {
+
+
+prompt_builder = PromptBuilder()
+prompt = prompt_builder.build_prompt(
+    "persona",
+    {
         "role": "a senior DevOps engineer at Netflix",
         "experience": "8 years of infrastructure automation",
         "style": "direct and practical",
         "priority": "reliability over speed",
         "task": "Explain why container orchestration matters for microservices.",
-    })
-print (prompt)
+    },
+)
+print(prompt)

@@ -55,3 +55,18 @@
 - **Testing:** Added prompt-loading tests.
 - **Code State:** Reusable prompt configuration implemented.
 - **Next Step:** CRM domain modeling.
+
+
+
+## Step 5: CRM Domain Modeling
+
+- **Goal:** Define typed CRM entities and their relationships.
+- **Problem:** Unstructured records make validation and retrieval
+  inconsistent.
+- **Solution:** Created Pydantic models for customers, contracts,
+  terms, add-ons, and add-on status.
+- **Trade-off:** Nested models simplify the initial example, while
+  a normalized database will be more suitable for larger datasets.
+- **Testing:** Verified relationships, enum values, and fee validation.
+- **Code State:** Domain models and synthetic sample data implemented.
+- **Next Step:** Rule-based contract and add-on retrieval.

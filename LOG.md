@@ -40,3 +40,18 @@
   and unexpected fields.
 - **Code State:** Structured response schema implemented.
 - **Next Step:** Prompt engineering and prompt versioning.
+
+
+## Step 4: Prompt Engineering and Configuration
+
+- **Goal:** Separate prompts and configuration from application logic.
+- **Problem:** Hardcoded prompts and environment settings are difficult
+  to maintain and review.
+- **Solution:** Added .env configuration, a safe .env.example,
+  centralized settings, external prompt files, and a few-shot example.
+- **Trade-off:** External prompt files improve maintainability but
+  require deployment packaging and version control.
+- **Security:** Excluded .env from Git.
+- **Testing:** Added prompt-loading tests.
+- **Code State:** Reusable prompt configuration implemented.
+- **Next Step:** CRM domain modeling.

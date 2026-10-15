@@ -70,3 +70,17 @@
 - **Testing:** Verified relationships, enum values, and fee validation.
 - **Code State:** Domain models and synthetic sample data implemented.
 - **Next Step:** Rule-based contract and add-on retrieval.
+
+
+## Step 6: Rule-Based CRM Retrieval
+
+- **Goal:** Retrieve contracts, terms, and active add-ons deterministically.
+- **Problem:** LLM-generated contract facts cannot be trusted as source data.
+- **Solution:** Added Python functions for contract lookup, term retrieval,
+  and active add-on filtering.
+- **Trade-off:** In-memory data is easy to test but is not persistent
+  and does not scale as a production data store.
+- **Testing:** Added tests for existing and missing contracts and
+  active add-on filtering.
+- **Code State:** Basic retrieval service implemented.
+- **Next Step:** Introduce a data access layer and database-ready repository.

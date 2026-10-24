@@ -11,6 +11,7 @@ from refund_agent.models import (
 )
 from refund_agent.orders import get_order
 from refund_agent.policy import evaluate_refund
+from refund_agent.guardrails import apply_guardrails
 
 
 def process_refund(
@@ -59,8 +60,14 @@ def process_refund(
         )
 
     # 4. Apply deterministic business rules.
-    return evaluate_refund(
+    decision = evaluate_refund(
         request=request,
         order=order,
         today=current_date,
+    )
+
+    return apply_guardrails(
+        request=request,
+        order=order,
+        decision=decision,
     )

@@ -8,15 +8,26 @@ from openai import (
     RateLimitError,
 )
 
+
 from refund_agent.reliability import retry_call
 
 from refund_agent.intent import IntentResult
+from refund_agent.config import get_settings
+
+settings = get_settings()
+
+api_key = (
+    settings.openai_api_key.get_secret_value()
+    if settings.openai_api_key
+    else None
+)
 
 load_dotenv()
 
 llm = ChatOpenAI(
-    model="gpt-6-luna",
-    #    temperature=0,
+    model=settings.llm_model,
+#    temperature=0,
+    api_key=api_key,
 )
 
 

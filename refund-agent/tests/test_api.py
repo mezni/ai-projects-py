@@ -101,3 +101,41 @@ def test_missing_server_configuration_fails_closed(monkeypatch):
     response = client.get("/metrics", headers=AUTH_HEADERS)
 
     assert response.status_code == 503
+
+
+
+
+def test_refund_endpoint_rate_limit(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from refund_agent.api import app, limiter
+
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
+
+    client = TestClient(
+        app,
+        client=("192.0.2.25", 50000),
+    )
+    headers = {"X-API-Key": TEST_API_KEY}
+    payload = {
+        "customer_message": "Please refund order 4821 because it arrived damaged."
+    }
+
+    # Use a unique client address for this test.
+    limiter.reset()
+
+    for _ in range(10):
+        response = client.post(
+            "/refunds",
+            json=payload,
+            headers=headers,
+        )
+        assert response.status_code == 200
+
+    response = client.post(
+        "/refunds",
+        json=payload,
+        headers=headers,
+    )
+
+    assert response.status_code == 429

@@ -24,8 +24,15 @@ def test_large_refund_is_pending_and_not_stored(service, refunds):
     res = service.request_refund("A1002", "c1", Decimal("349.00"), R)
     assert res.outcome is Outcome.PENDING_APPROVAL
     _, created = refunds.create_if_absent(
-        Refund(refund_id="x", order_id="A1002", customer_id="c1", amount=Decimal("1"),
-               reason=R, approved_by="auto", created_at=datetime.now(UTC))
+        Refund(
+            refund_id="x",
+            order_id="A1002",
+            customer_id="c1",
+            amount=Decimal("1"),
+            reason=R,
+            approved_by="auto",
+            created_at=datetime.now(UTC),
+        )
     )
     assert created is True  # nothing had been stored
 
@@ -51,9 +58,15 @@ def test_execute_approved_still_enforces_policy(service):
 
 def test_existing_refund_row_yields_duplicate(service, refunds):
     refunds.create_if_absent(
-        Refund(refund_id="refund-A1001", order_id="A1001", customer_id="c1",
-               amount=Decimal("10"), reason=R, approved_by="auto",
-               created_at=datetime.now(UTC))
+        Refund(
+            refund_id="refund-A1001",
+            order_id="A1001",
+            customer_id="c1",
+            amount=Decimal("10"),
+            reason=R,
+            approved_by="auto",
+            created_at=datetime.now(UTC),
+        )
     )
     res = service.request_refund("A1001", "c1", Decimal("10"), R)
     assert res.outcome is Outcome.DUPLICATE

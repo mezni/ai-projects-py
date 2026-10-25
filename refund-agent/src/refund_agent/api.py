@@ -13,6 +13,9 @@ from refund_agent.metrics import agent_metrics
 from refund_agent.models import RefundDecision
 from refund_agent.security import require_api_key
 from refund_agent.input_validation import CustomerMessage
+from refund_agent.review_api import router as review_router
+
+app.include_router(review_router)
 
 limiter = Limiter(key_func=get_remote_address)
 

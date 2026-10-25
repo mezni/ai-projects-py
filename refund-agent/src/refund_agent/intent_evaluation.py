@@ -1,4 +1,3 @@
-
 from collections.abc import Callable
 from typing import Any
 
@@ -29,12 +28,9 @@ def evaluate_intent_cases(
         # A critical error is either a false refund classification
         # or an invented order ID where none was expected.
         false_refund_classification = (
-            expected_intent != "refund_request"
-            and actual_intent == "refund_request"
+            expected_intent != "refund_request" and actual_intent == "refund_request"
         )
-        invented_order_id = (
-            expected_order_id is None and actual_order_id is not None
-        )
+        invented_order_id = expected_order_id is None and actual_order_id is not None
 
         results.append(
             {

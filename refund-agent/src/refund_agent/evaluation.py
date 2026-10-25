@@ -1,4 +1,3 @@
-
 import json
 from datetime import date
 from pathlib import Path
@@ -57,24 +56,19 @@ def run_evaluation(
     # A false approval occurs when a case expected to be rejected
     # or escalated is actually approved.
     false_approvals = sum(
-        result["actual"] == "approved"
-        and result["expected"] != "approved"
+        result["actual"] == "approved" and result["expected"] != "approved"
         for result in results
     )
 
     expected_escalations = [
-        result for result in results
-        if result["expected"] == "escalated"
+        result for result in results if result["expected"] == "escalated"
     ]
     correctly_escalated = sum(
-        result["actual"] == "escalated"
-        for result in expected_escalations
+        result["actual"] == "escalated" for result in expected_escalations
     )
 
     escalation_recall = (
-        correctly_escalated / len(expected_escalations)
-        if expected_escalations
-        else 1.0
+        correctly_escalated / len(expected_escalations) if expected_escalations else 1.0
     )
 
     return {

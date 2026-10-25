@@ -2,7 +2,7 @@
 from typing import Any
 
 from fastapi import Depends, FastAPI, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -12,6 +12,7 @@ from refund_agent.health import liveness_check, readiness_check
 from refund_agent.metrics import agent_metrics
 from refund_agent.models import RefundDecision
 from refund_agent.security import require_api_key
+from refund_agent.input_validation import CustomerMessage
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -34,6 +35,12 @@ class RefundMessage(BaseModel):
         max_length=5000,
         description="The customer's refund-related message.",
     )
+
+    @field_validator("customer_message")
+    @classmethod
+    def validate_customer_message(cls, value: str) -> str:
+        validated = CustomerMessage(text=value)
+        return validated.text
 
 
 class RefundResponse(BaseModel):

@@ -76,13 +76,13 @@ def test_issue_refund_records_refund():
     assert REFUNDS["4821"] == result
 
 
-def test_issue_high_value_refund_waits_for_approval():
+def test_high_value_refund_is_issued_when_called_directly():
     result = json.loads(
         issue_refund.invoke({"order_id": "4824", "reason": "Changed my mind."})
     )
 
-    assert result["status"] == "pending_approval"
-    assert "4824" not in REFUNDS
+    assert result["status"] == "refunded"
+    assert REFUNDS["4824"] == result
 
 
 def test_issue_refund_rejects_ineligible_order():

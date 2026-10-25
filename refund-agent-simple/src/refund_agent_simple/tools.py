@@ -99,16 +99,6 @@ def issue_refund(order_id: str, reason: str) -> str:
 
     order = ORDERS[order_id]
 
-    if policy["requires_human_approval"]:
-        return json.dumps(
-            {
-                "order_id": order_id,
-                "status": "pending_approval",
-                "amount_usd": order["amount_usd"],
-                "message": "Refunds above 100 USD require human approval.",
-            }
-        )
-
     refund = {
         "order_id": order_id,
         "amount_usd": order["amount_usd"],

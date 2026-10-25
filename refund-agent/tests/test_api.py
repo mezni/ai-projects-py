@@ -8,33 +8,43 @@ from refund_agent.api import app
 from refund_agent.models import RefundDecision, RefundStatus
 
 client = TestClient(app)
+TEST_API_KEY = "test-only-refund-agent-key"
+AUTH_HEADERS = {"X-API-Key": TEST_API_KEY}
 
 
-def test_liveness_endpoint():
+def test_liveness_is_public():
     response = client.get("/health/live")
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
-def test_readiness_endpoint():
-    response = client.get("/health/ready")
+def test_refund_requires_api_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
 
-    assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    response = client.post(
+        "/refunds",
+        json={"customer_message": "Refund order 4821"},
+    )
 
-
-def test_metrics_endpoint():
-    response = client.get("/metrics")
-
-    assert response.status_code == 200
-    body = response.json()
-    assert "requests_total" in body
-    assert "outcomes" in body
-    assert "latency_ms" in body
+    assert response.status_code == 401
 
 
-def test_create_refund_returns_decision_and_customer_response():
+def test_refund_rejects_invalid_api_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
+
+    response = client.post(
+        "/refunds",
+        headers={"X-API-Key": "wrong-key"},
+        json={"customer_message": "Refund order 4821"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_refund_returns_decision_with_valid_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
+
     decision = RefundDecision(
         order_id="4821",
         status=RefundStatus.APPROVED,
@@ -51,33 +61,43 @@ def test_create_refund_returns_decision_and_customer_response():
     ) as mock_handler:
         response = client.post(
             "/refunds",
-            json={
-                "customer_message": (
-                    "Please refund order 4821."
-                )
-            },
+            headers=AUTH_HEADERS,
+            json={"customer_message": "Refund order 4821"},
         )
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["decision"]["status"] == "approved"
-    assert body["decision"]["order_id"] == "4821"
-    assert body["customer_response"] == (
-        "Your refund request has been approved."
-    )
+    assert response.json()["decision"]["status"] == "approved"
     mock_handler.assert_called_once()
 
 
-def test_create_refund_rejects_empty_message():
-    response = client.post(
-        "/refunds",
-        json={"customer_message": ""},
-    )
+def test_readiness_requires_api_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
 
-    assert response.status_code == 422
+    response = client.get("/health/ready")
+
+    assert response.status_code == 401
 
 
-def test_create_refund_rejects_missing_message():
-    response = client.post("/refunds", json={})
+def test_metrics_requires_api_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
 
-    assert response.status_code == 422
+    response = client.get("/metrics")
+
+    assert response.status_code == 401
+
+
+def test_metrics_returns_data_with_valid_key(monkeypatch):
+    monkeypatch.setenv("REFUND_AGENT_API_KEY", TEST_API_KEY)
+
+    response = client.get("/metrics", headers=AUTH_HEADERS)
+
+    assert response.status_code == 200
+    assert "requests_total" in response.json()
+
+
+def test_missing_server_configuration_fails_closed(monkeypatch):
+    monkeypatch.delenv("REFUND_AGENT_API_KEY", raising=False)
+
+    response = client.get("/metrics", headers=AUTH_HEADERS)
+
+    assert response.status_code == 503

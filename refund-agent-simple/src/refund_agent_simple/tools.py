@@ -38,6 +38,8 @@ ORDERS: dict[str, dict[str, Any]] = {
     },
 }
 
+REFUNDS: dict[str, dict[str, Any]] = {}
+
 
 @tool
 def lookup_order(order_id: str) -> str:
@@ -48,12 +50,10 @@ def lookup_order(order_id: str) -> str:
     return json.dumps(order)
 
 
-@tool
-def check_refund_policy(order_id: str) -> str:
-    """Check whether an order is eligible for a refund and whether it needs approval."""
+def _policy_result(order_id: str) -> dict[str, Any]:
     order = ORDERS.get(order_id)
     if order is None:
-        return json.dumps({"error": f"No order found with ID {order_id}."})
+        return {"error": f"No order found with ID {order_id}."}
 
     reasons: list[str] = []
 
@@ -65,13 +65,55 @@ def check_refund_policy(order_id: str) -> str:
         reasons.append("Item is not unused.")
 
     eligible = not reasons
-    requires_approval = eligible and order["amount_usd"] > 100
 
-    return json.dumps(
-        {
-            "order_id": order_id,
-            "eligible": eligible,
-            "reasons": reasons,
-            "requires_human_approval": requires_approval,
-        }
-    )
+    return {
+        "order_id": order_id,
+        "eligible": eligible,
+        "reasons": reasons,
+        "requires_human_approval": eligible and order["amount_usd"] > 100,
+    }
+
+
+@tool
+def check_refund_policy(order_id: str) -> str:
+    """Check whether an order is eligible for a refund and whether it needs approval."""
+    return json.dumps(_policy_result(order_id))
+
+
+@tool
+def issue_refund(order_id: str, reason: str) -> str:
+    """Issue a refund for an order when policy allows it."""
+    policy = _policy_result(order_id)
+
+    if "error" in policy:
+        return json.dumps(policy)
+
+    if not policy["eligible"]:
+        return json.dumps(
+            {
+                "order_id": order_id,
+                "status": "rejected",
+                "reasons": policy["reasons"],
+            }
+        )
+
+    order = ORDERS[order_id]
+
+    if policy["requires_human_approval"]:
+        return json.dumps(
+            {
+                "order_id": order_id,
+                "status": "pending_approval",
+                "amount_usd": order["amount_usd"],
+                "message": "Refunds above 100 USD require human approval.",
+            }
+        )
+
+    refund = {
+        "order_id": order_id,
+        "amount_usd": order["amount_usd"],
+        "reason": reason,
+        "status": "refunded",
+    }
+    REFUNDS[order_id] = refund
+    return json.dumps(refund)

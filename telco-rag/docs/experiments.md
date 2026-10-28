@@ -757,3 +757,18 @@ Identify the next experiment or implementation task.
 **Git Commit**
 
 Record the commit hash and message after a successful commit.
+
+
+## Experiment 006 — Vector Storage and Similarity Search
+
+- **Goal:** Persist telecom chunks, metadata, and embeddings.
+- **Database:** PostgreSQL with pgvector.
+- **Schema:** `document_chunks`.
+- **Vector dimension:** 1536 for the default embedding model.
+- **Similarity:** Cosine distance.
+- **Implementation:** Upsert chunks and retrieve nearest neighbors.
+- **Validation:** Unit tests for dimensions and query limits; database
+  integration tests still required.
+- **Trade-off:** Relational storage and vector search share one database,
+  but schema dimensions must remain aligned with the embedding model.
+- **Outcome:** Pending execution of tests and database integration checks.

@@ -293,3 +293,37 @@ Record the commit hash and message after a successful commit.
 
 Choose one: Planned, In Progress, Blocked, or Complete.
 
+## Step 5 — Embedding Generation
+
+### Component / Step
+
+Embedding provider and chunk vector generation.
+
+### Goal
+
+Convert document chunks and user queries into vectors for semantic retrieval.
+
+### Problem / Friction
+
+Keyword matching alone can miss relevant telecom documentation when the
+question and source passage use different terminology.
+
+### Solution & Trade-offs
+
+Implemented an OpenAI embedding provider with batch embedding, query
+embedding, and an EmbeddedChunk representation that preserves source
+provenance.
+
+The provider supports dependency injection for tests. Unit tests use a fake
+client to avoid network calls and API costs.
+
+Hosted embeddings simplify integration but require API credentials and introduce
+cost, network dependency, and data-handling considerations.
+
+### Validation
+
+Pending execution of embedding tests, the full test suite, and Ruff checks.
+
+### Status
+
+In Progress until validation passes.
